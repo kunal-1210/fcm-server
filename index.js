@@ -15,15 +15,21 @@ admin.initializeApp({
 app.post('/sendNotification', async (req, res) => {
     try {
         const { ownerFcmToken, title, body, bookingId } = req.body;
+
+        if (!ownerFcmToken) {
+            return res.status(400).send({ success: false, error: "ownerFcmToken is required" });
+        }
+
         const message = {
             notification: { title, body },
-            data: { bookingId },
-            token
+            data: { bookingId: bookingId || "" },
+            token: ownerFcmToken   // ✅ FIXED
         };
+
         await admin.messaging().send(message);
         res.status(200).send({ success: true });
     } catch (err) {
-        console.error(err);
+        console.error("Error sending notification:", err);
         res.status(500).send({ success: false, error: err.message });
     }
 });
