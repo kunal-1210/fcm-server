@@ -14,7 +14,7 @@ admin.initializeApp({
 
 app.post('/sendNotification', async (req, res) => {
     try {
-        const { token, title, body, bookingId } = req.body;
+        const { ownerFcmToken, title, body, bookingId } = req.body;
         const message = {
             notification: { title, body },
             data: { bookingId },
