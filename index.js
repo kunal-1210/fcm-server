@@ -15,6 +15,7 @@ admin.initializeApp({
 
 // Route to send FCM notification
 app.post('/sendNotification', async (req, res) => {
+    console.log("Request body:", req.body);
     const { token, title, body, bookingId } = req.body;
 
     const message = {
