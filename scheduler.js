@@ -1,11 +1,6 @@
 const admin = require("firebase-admin");
 const fetch = require("node-fetch");
 
-// Initialize Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(require("./serviceAccountKey.json")),
-  databaseURL: "https://reg-log-94747-default-rtdb.firebaseio.com"
-});
 
 async function checkBookingsAndNotify() {
   const now = new Date();
