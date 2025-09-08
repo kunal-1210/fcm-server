@@ -1,44 +1,38 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
+const fetch = require('node-fetch');
 
-const app = express();
-app.use(bodyParser.json());
+module.exports = function(admin) {
+    console.log("📅 Scheduler started: checking bookings every 1 minute");
 
-// Initialize Firebase Admin using the env variable
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
+    async function checkBookingsAndNotify() {
+        const now = new Date();
+        const snapshot = await admin.database().ref("Bookings").once("value");
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://reg-log-94747-default-rtdb.firebaseio.com"
-});
+        snapshot.forEach(bookingSnap => {
+            const booking = bookingSnap.val();
+            if (!booking.pickupdate || !booking.pickuptime) return;
 
-// FCM endpoint
-app.post('/sendNotification', async (req, res) => {
-    try {
-        const { ownerFcmToken, title, body, bookingId } = req.body;
+            const pickupDateTime = new Date(`${booking.pickupdate}T${booking.pickuptime}`);
+            const timeToPickup = pickupDateTime - now;
+            const thirtyMinutes = 30 * 60 * 1000;
 
-        if (!ownerFcmToken) {
-            return res.status(400).send({ success: false, error: "ownerFcmToken is required" });
-        }
+            if (timeToPickup <= thirtyMinutes && timeToPickup > 0 && !booking.pickupNotificationSent) {
+                console.log(`Sending PICKUP notification for booking: ${bookingSnap.key}`);
+                sendNotification(booking.userfcmToken, "Pickup Reminder", `Pickup for ${booking.carName || "the car"} in 30 minutes.`);
+                sendNotification(booking.ownerfcmToken, "Pickup Reminder", `Renter will pick up ${booking.carName || "your car"} in 30 minutes.`);
 
-        const message = {
-            notification: { title, body },
-            data: { bookingId: bookingId || "" },
-            token: ownerFcmToken
-        };
-
-        await admin.messaging().send(message);
-        res.status(200).send({ success: true });
-    } catch (err) {
-        console.error("Error sending notification:", err);
-        res.status(500).send({ success: false, error: err.message });
+                admin.database().ref(`Bookings/${bookingSnap.key}`).update({ pickupNotificationSent: true });
+            }
+        });
     }
-});
 
-// ===== Include the scheduler =====
-require("./scheduler.js")(admin); // This will start the interval automatically
+    async function sendNotification(token, title, body) {
+        if (!token) return console.error("Missing FCM token");
+        await fetch("https://fcm-server-kxn1.onrender.com/sendNotification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ownerFcmToken: token, title, body })
+        });
+    }
 
-// Start server
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    setInterval(checkBookingsAndNotify, 60000);
+};
