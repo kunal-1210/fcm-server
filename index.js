@@ -18,7 +18,7 @@ app.post('/sendNotification', async (req, res) => {
     const { token, title, body, bookingId } = req.body;
 
     const message = {
-        token
+        token,
         notification: { title, body },
         data: { bookingId },
     };
