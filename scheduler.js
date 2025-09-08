@@ -1,6 +1,8 @@
 const admin = require("firebase-admin");
 const fetch = require("node-fetch");
 
+module.exports = function(admin) {  // receive admin from index.js
+    console.log("📅 Scheduler started: checking bookings every 1 minute");
 
 async function checkBookingsAndNotify() {
   const now = new Date();

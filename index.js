@@ -37,7 +37,7 @@ app.post('/sendNotification', async (req, res) => {
 });
 
 // ===== Include the scheduler =====
-require("./scheduler.js"); // This will start the interval automatically
+require("./scheduler.js")(admin); // This will start the interval automatically
 
 // Start server
 const PORT = process.env.PORT || 10000;
