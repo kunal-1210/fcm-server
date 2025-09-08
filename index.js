@@ -14,7 +14,6 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-const app = express();
 app.use(bodyParser.json());
 
 // Route to send FCM notification
