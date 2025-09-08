@@ -10,6 +10,7 @@ const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
+    databaseURL: "https://reg-log-94747-default-rtdb.firebaseio.com"
 });
 
 // FCM endpoint
