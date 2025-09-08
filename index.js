@@ -24,7 +24,7 @@ app.post('/sendNotification', async (req, res) => {
                 token: ownerFcmToken,
                 notification: {
                     title: title,
-                    body: body.owner
+                    body: body
                 },
                 data: { bookingId }
             };
@@ -38,7 +38,7 @@ app.post('/sendNotification', async (req, res) => {
                 token: userFcmToken,
                 notification: {
                     title: title,
-                    body: body.user
+                    body: body
                 },
                 data: { bookingId }
             };
