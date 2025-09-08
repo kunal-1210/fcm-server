@@ -12,6 +12,7 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
+// FCM endpoint
 app.post('/sendNotification', async (req, res) => {
     try {
         const { ownerFcmToken, title, body, bookingId } = req.body;
@@ -23,7 +24,7 @@ app.post('/sendNotification', async (req, res) => {
         const message = {
             notification: { title, body },
             data: { bookingId: bookingId || "" },
-            token: ownerFcmToken   // ✅ FIXED
+            token: ownerFcmToken
         };
 
         await admin.messaging().send(message);
@@ -34,5 +35,9 @@ app.post('/sendNotification', async (req, res) => {
     }
 });
 
+// ===== Include the scheduler =====
+require("./scheduler.js"); // This will start the interval automatically
+
+// Start server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
