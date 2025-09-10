@@ -8,14 +8,23 @@ async function checkBookingsAndNotify() {
   const nowHours = now.getHours();
   const nowMinutes = now.getMinutes();
 
+  // Fetch all bookings
   const snapshot = await admin.database().ref("Bookings").once("value");
+  const bookings = snapshot.val();
 
-  snapshot.forEach(async (bookingSnap) => {
-    const booking = bookingSnap.val();
+  if (!bookings) {
+    console.log("ℹ️ No bookings found.");
+    return;
+  }
 
-    if (!booking.pickuptime) return;
+  // Loop through each booking
+  for (const key in bookings) {
+    const booking = bookings[key];
+    const bookingRef = admin.database().ref(`Bookings/${key}`);
 
-    // Extract hours and minutes from pickuptime (format: "HH:mm")
+    if (!booking.pickuptime) continue;
+
+    // Extract hours and minutes from pickuptime ("HH:mm")
     const [pickupHours, pickupMinutes] = booking.pickuptime.split(":").map(Number);
 
     // Calculate minutes left until pickup
@@ -24,7 +33,7 @@ async function checkBookingsAndNotify() {
     const minutesUntilPickup = pickupTimeInMinutes - nowInMinutes;
 
     // Send notification 30 minutes before pickup
-    if(minutesUntilPickup <= 30 && minutesUntilPickup > 29 && !booking.pickupNotificationSent) {
+    if (minutesUntilPickup <= 30 && minutesUntilPickup > 29 && !booking.pickupNotificationSent) {
 
       // Owner notification
       if (booking.ownerfcmToken) {
@@ -34,7 +43,7 @@ async function checkBookingsAndNotify() {
             title: "Upcoming Pickup",
             body: `Your ${booking.carName} booking starts in 30 minutes.`,
           },
-          data: { bookingId: bookingSnap.key },
+          data: { bookingId: key },
         });
         console.log(`📢 Notification sent to owner: ${booking.ownerfcmToken}`);
       }
@@ -47,15 +56,18 @@ async function checkBookingsAndNotify() {
             title: "Pickup Reminder",
             body: `Your booking for ${booking.carName} starts in 30 minutes.`,
           },
-          data: { bookingId: bookingSnap.key },
+          data: { bookingId: key },
         });
         console.log(`📢 Notification sent to renter: ${booking.userfcmToken}`);
       }
 
       // Mark notification as sent
-      await bookingSnap.ref.update({ pickupNotificationSent: true });
+      await bookingRef.update({ pickupNotificationSent: true });
+      console.log(`📝 Booking ${key} marked as notified`);
     }
-  });
+  }
+
+  console.log("✅ Scheduler task completed");
 }
 
 module.exports = { checkBookingsAndNotify };
