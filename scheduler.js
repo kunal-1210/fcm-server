@@ -1,20 +1,6 @@
 // scheduler.js
-const express = require('express');
-const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
+const admin = require('./firebase'); // reuse the single Firebase app
 
-const app = express();
-app.use(bodyParser.json());
-
-// Initialize Firebase Admin
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://reg-log-94747-default-rtdb.firebaseio.com"
-});
-
-// This function checks bookings and sends notifications
 async function checkBookingsAndNotify() {
   console.log("⏰ Scheduler triggered!");
 
@@ -66,16 +52,4 @@ async function checkBookingsAndNotify() {
   });
 }
 
-// ✅ Route to manually trigger scheduler
-app.get('/run-scheduler', async (req, res) => {
-  try {
-    await checkBookingsAndNotify();
-    res.status(200).send({ success: true, message: "Scheduler ran successfully!" });
-  } catch (err) {
-    console.error("❌ Scheduler error:", err);
-    res.status(500).send({ success: false, error: err.message });
-  }
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Scheduler running on port ${PORT}`));
+module.exports = { checkBookingsAndNotify };
