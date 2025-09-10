@@ -58,6 +58,8 @@ async function checkBookingsAndNotify() {
         });
         console.log(`📢 Notification sent to owner: ${booking.ownerfcmToken}`);
       }
+await bookingRef.update({ dropoffNotificationSent: true });
+
 
       // Renter notification
       if (booking.userfcmToken) {
@@ -74,6 +76,7 @@ async function checkBookingsAndNotify() {
 
       // Mark notification as sent
       await bookingRef.update({ pickupNotificationSent: true });
+     
       console.log(`📝 Booking ${key} marked as notified`);
     } else {
       console.log(`ℹ️ No notification needed for booking ${key} (minutesUntilPickup: ${minutesUntilPickup})`);
