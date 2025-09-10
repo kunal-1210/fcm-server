@@ -51,8 +51,8 @@ async function checkBookingsAndNotify() {
         await admin.messaging().send({
           token: booking.ownerfcmToken,
           notification: {
-            title: "Upcoming Pickup",
-            body: `Your ${booking.carName} booking starts in 30 minutes.`,
+            title: "Upcoming Drop off",
+            body: `Hi ${booking.hostname}! Your ${booking.carname} will be picked up in 30 minutes. Please ensure it’s ready.`,
           },
           data: { bookingId: key },
         });
@@ -65,7 +65,7 @@ async function checkBookingsAndNotify() {
           token: booking.userfcmToken,
           notification: {
             title: "Pickup Reminder",
-            body: `Your booking for ${booking.carName} starts in 30 minutes.`,
+            body: `Hi ${booking.rentername}! Your ${booking.carname} booking will start in 30 minutes. Please be ready for pickup.`,
           },
           data: { bookingId: key },
         });
