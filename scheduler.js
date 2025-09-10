@@ -16,13 +16,19 @@ async function checkBookingsAndNotify() {
     console.log("ℹ️ No bookings found.");
     return;
   }
-
+console.log(`ℹ️ Found ${Object.keys(bookings).length} bookings.`);
   // Loop through each booking
   for (const key in bookings) {
     const booking = bookings[key];
     const bookingRef = admin.database().ref(`bookings/${key}`);
 
-    if (!booking.pickuptime) continue;
+    console.log(`🔹 Checking booking: ${key}`);
+
+   if (!booking.pickuptime) {
+      console.warn(`⚠️ Booking ${key} has no pickuptime, skipping.`);
+      continue;
+    }
+
 
     // Extract hours and minutes from pickuptime ("HH:mm")
     const [pickupHours, pickupMinutes] = booking.pickuptime.split(":").map(Number);
