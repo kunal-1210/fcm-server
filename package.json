@@ -2,7 +2,7 @@
   "name": "fcm-server",
   "version": "1.0.0",
   "description": "",
-  "main": "scheduler.js",
+  "main": "index.js",
   "dependencies": {
     "abort-controller": "^3.0.0",
     "accepts": "^2.0.0",
@@ -178,7 +178,6 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
-    "start": "node scheduler.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
