@@ -2,7 +2,7 @@
   "name": "fcm-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "scheduler.js",
   "dependencies": {
     "abort-controller": "^3.0.0",
     "accepts": "^2.0.0",
