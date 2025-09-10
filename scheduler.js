@@ -5,49 +5,55 @@ async function checkBookingsAndNotify() {
   console.log("⏰ Scheduler triggered!");
 
   const now = new Date();
+  const nowHours = now.getHours();
+  const nowMinutes = now.getMinutes();
+
   const snapshot = await admin.database().ref("Bookings").once("value");
 
-  snapshot.forEach(bookingSnap => {
+  snapshot.forEach(async (bookingSnap) => {
     const booking = bookingSnap.val();
 
-    if (!booking.pickuptime || !booking.pickupdate) return;
+    if (!booking.pickuptime) return;
 
-    const pickupDateTime = new Date(`${booking.pickupdate} ${booking.pickuptime}`);
-    const thirtyMinutesBefore = new Date(pickupDateTime.getTime() - 30 * 60000);
+    // Extract hours and minutes from pickuptime (format: "HH:mm")
+    const [pickupHours, pickupMinutes] = booking.pickuptime.split(":").map(Number);
 
-    if (
-      now >= thirtyMinutesBefore &&
-      now < pickupDateTime &&
-      booking.pickupNotificationSent === false
-    ) {
-      // Send to owner
+    // Calculate minutes left until pickup
+    const pickupTimeInMinutes = pickupHours * 60 + pickupMinutes;
+    const nowInMinutes = nowHours * 60 + nowMinutes;
+    const minutesUntilPickup = pickupTimeInMinutes - nowInMinutes;
+
+    // Send notification 30 minutes before pickup
+    if (minutesUntilPickup === 30 && !booking.pickupNotificationSent) {
+
+      // Owner notification
       if (booking.ownerfcmToken) {
-        admin.messaging().send({
+        await admin.messaging().send({
           token: booking.ownerfcmToken,
           notification: {
             title: "Upcoming Pickup",
             body: `Your ${booking.carName} booking starts in 30 minutes.`,
           },
-          data: { bookingId: bookingSnap.key }
+          data: { bookingId: bookingSnap.key },
         });
         console.log(`📢 Notification sent to owner: ${booking.ownerfcmToken}`);
       }
 
-      // Send to renter
+      // Renter notification
       if (booking.userfcmToken) {
-        admin.messaging().send({
+        await admin.messaging().send({
           token: booking.userfcmToken,
           notification: {
             title: "Pickup Reminder",
             body: `Your booking for ${booking.carName} starts in 30 minutes.`,
           },
-          data: { bookingId: bookingSnap.key }
+          data: { bookingId: bookingSnap.key },
         });
         console.log(`📢 Notification sent to renter: ${booking.userfcmToken}`);
       }
 
-      // Mark as sent
-      bookingSnap.ref.update({ pickupNotificationSent: true });
+      // Mark notification as sent
+      await bookingSnap.ref.update({ pickupNotificationSent: true });
     }
   });
 }
