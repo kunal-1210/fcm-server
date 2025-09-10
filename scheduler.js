@@ -24,7 +24,7 @@ async function checkBookingsAndNotify() {
     const minutesUntilPickup = pickupTimeInMinutes - nowInMinutes;
 
     // Send notification 30 minutes before pickup
-    if (minutesUntilPickup === 30 && !booking.pickupNotificationSent) {
+    if(minutesUntilPickup <= 30 && minutesUntilPickup > 29 && !booking.pickupNotificationSent) {
 
       // Owner notification
       if (booking.ownerfcmToken) {
