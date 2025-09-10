@@ -20,7 +20,7 @@ async function checkBookingsAndNotify() {
   // Loop through each booking
   for (const key in bookings) {
     const booking = bookings[key];
-    const bookingRef = admin.database().ref(`Bookings/${key}`);
+    const bookingRef = admin.database().ref(`bookings/${key}`);
 
     if (!booking.pickuptime) continue;
 
