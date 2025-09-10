@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
+const cron = require('node-cron');
+const { checkBookingsAndNotify } = require('./scheduler'); // Import your scheduler function
 
 const app = express(); // ✅ Make sure this is here
 app.use(bodyParser.json());
@@ -53,5 +55,22 @@ app.post('/sendNotification', async (req, res) => {
     }
 });
 
+cron.schedule('* * * * *', async () => {
+    console.log('⏰ Running scheduler every minute');
+    try {
+        await checkBookingsAndNotify();
+        console.log('✅ Scheduler task completed');
+    } catch (err) {
+        console.error('❌ Scheduler error:', err);
+    }
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+// Runs every minute
+cron.schedule('* * * * *', () => {
+  console.log('⏰ Running scheduler every minute');
+  checkBookingsAndNotify();
+});
