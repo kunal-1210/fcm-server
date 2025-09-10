@@ -9,7 +9,7 @@ async function checkBookingsAndNotify() {
   const nowMinutes = now.getMinutes();
 
   // Fetch all bookings
-  const snapshot = await admin.database().ref("Bookings").once("value");
+  const snapshot = await admin.database().ref("bookings").once("value");
   const bookings = snapshot.val();
 
   if (!bookings) {
