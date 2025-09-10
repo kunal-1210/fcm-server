@@ -49,5 +49,10 @@ cron.schedule('* * * * *', async () => {
   }
 });
 
+app.get('/ping', (req, res) => {
+  console.log("📡 Ping received to keep server awake");
+  res.status(200).send("Server is alive! 🟢");
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
